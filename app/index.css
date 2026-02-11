@@ -1,0 +1,44 @@
+/* Landing page & dashboard visual enhancements */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.1); }
+}
+@keyframes highlight-fade {
+  0% { background-color: rgba(99, 102, 241, 0.1); transform: scale(1.02); }
+  100% { background-color: transparent; transform: scale(1); }
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.glow-orb {
+  filter: blur(120px);
+  border-radius: 50%;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.spec-card:hover .spec-number {
+  color: #4f46e5;
+  transform: translateX(4px);
+}
+.spec-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.spec-card:hover {
+  background: rgba(248, 250, 252, 0.8);
+  padding-left: 2rem;
+}
+
+.animate-highlight {
+  animation: highlight-fade 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -21,8 +21,8 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
-      setLoading(true);
+    const load = async (showLoading: boolean) => {
+      if (showLoading) setLoading(true);
       try {
         const [statsRes, anchorsRes, eventsRes] = await Promise.all([
           fetchExplorerStats(),
@@ -49,12 +49,19 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
       } catch {
         if (cancelled) return;
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && showLoading) setLoading(false);
       }
     };
 
-    load();
-    return () => { cancelled = true; };
+    void load(true);
+    const timer = setInterval(() => {
+      void load(false);
+    }, 8000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
   }, []);
 
   if (loading) {
@@ -70,10 +77,10 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard title="Total Anchors" value={net.total_anchors.toLocaleString()} icon={Box} subValue={`Depth ${net.total_anchors.toLocaleString()}`} />
-        <StatsCard title="Total Events" value={net.total_events.toLocaleString()} icon={Activity} subValue={`TPS: ${net.tps}`} />
-        <StatsCard title="Avg Anchor Time" value={net.avg_anchor_time > 0 ? `${net.avg_anchor_time}s` : '—'} icon={Clock} subValue="Consistency Frame" />
-        <StatsCard title="Validators" value={net.total_validators} icon={ShieldCheck} subValue="Active Participants" />
+        <StatsCard title="Total Anchors" value={net.total_anchors} suffix="" icon={Box} subValue={`Depth ${net.total_anchors.toLocaleString()}`} />
+        <StatsCard title="Total Events" value={net.total_events} suffix="" icon={Activity} subValue={`TPS: ${net.tps}`} />
+        <StatsCard title="Avg Anchor Time" value={net.avg_anchor_time} suffix="s" icon={Clock} subValue="Consistency Frame" />
+        <StatsCard title="Validators" value={net.total_validators} suffix="" icon={ShieldCheck} subValue="Active Participants" />
       </div>
 
       <CausalGraph onNavigate={onNavigate} />
@@ -91,8 +98,8 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
           {anchors.length > 0 ? (
             <div className="divide-y divide-slate-50">
               {anchors.map((anchor) => (
-                <div key={anchor.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => onNavigate('anchor_detail', anchor.id)}>
-                  <div className="flex items-center gap-4">
+                <div key={anchor.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer animate-highlight overflow-hidden relative" onClick={() => onNavigate('anchor_detail', anchor.id)}>
+                  <div className="flex items-center gap-4 relative z-10">
                     <div className="bg-slate-100 p-2.5 rounded-lg text-slate-500 font-mono text-[10px] flex items-center justify-center w-10 h-10">AC</div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -102,7 +109,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
                       <div className="text-[11px] text-slate-500 mt-0.5 font-mono">{anchor.id.slice(0, 20)}...</div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right relative z-10">
                     <div className="text-sm text-slate-700 font-medium">{anchor.event_count} txns</div>
                     <div className="text-[10px] text-slate-400">{new Date(anchor.timestamp).toLocaleTimeString()}</div>
                   </div>
@@ -127,8 +134,8 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
           {events.length > 0 ? (
             <div className="divide-y divide-slate-50">
               {events.map((event) => (
-                <div key={event.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => onNavigate('event_detail', event.id)}>
-                  <div className="flex items-center gap-4">
+                <div key={event.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer animate-highlight overflow-hidden relative" onClick={() => onNavigate('event_detail', event.id)}>
+                  <div className="flex items-center gap-4 relative z-10">
                     <div className="bg-slate-100 p-2.5 rounded-lg text-slate-500 font-mono text-[10px] flex items-center justify-center w-10 h-10">EV</div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -138,7 +145,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
                       <div className="text-[11px] text-slate-500 mt-0.5 truncate max-w-[200px] md:max-w-md">{event.summary}</div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right relative z-10">
                     <div className="text-sm text-indigo-600 font-bold">#{event.anchor_depth}</div>
                     <div className="text-[10px] text-slate-400 font-mono">{event.id.slice(0, 10)}...</div>
                   </div>

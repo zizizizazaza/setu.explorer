@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Zap, Box, Activity, User, Loader2, AlertCircle, Server, Cpu } from 'lucide-react';
+import { Search, Box, Activity, User, Loader2, AlertCircle, Server, Cpu } from 'lucide-react';
 import { fetchSearch } from '../api';
 import type { SearchResultItem } from '../api/types';
 
@@ -142,9 +142,11 @@ export const Navbar = ({ onNavigate, currentPath }: NavbarProps) => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between gap-8">
         <div className="flex items-center gap-2 cursor-pointer group" onClick={() => onNavigate('landing')}>
-          <div className="bg-indigo-600 p-1.5 rounded-lg group-hover:rotate-12 transition-transform shadow-lg shadow-indigo-200">
-            <Zap size={20} className="text-white fill-current" />
-          </div>
+          <img
+            src="/setu-logo.png"
+            alt="Setu"
+            className="h-8 w-auto object-contain group-hover:rotate-12"
+          />
           <span className="text-lg font-black tracking-tighter text-slate-900">SETU<span className="text-indigo-600 italic ml-1">EXPLORER</span></span>
         </div>
 
