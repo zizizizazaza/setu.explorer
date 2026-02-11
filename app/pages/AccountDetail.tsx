@@ -46,6 +46,7 @@ export const AccountDetail = ({ address, onNavigate }: AccountDetailProps) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[300px] text-slate-500 text-sm font-medium">Loading...</div>
+      
     );
   }
 
