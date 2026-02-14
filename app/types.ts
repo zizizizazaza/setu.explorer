@@ -45,7 +45,7 @@ export interface Event {
   execution_result?: {
     success: boolean;
     message: string;
-    state_changes: Array<{ key: string; old_value: string; new_value: string }>;
+    state_changes: Array<{ key: string; old_value: string | unknown; new_value: string | unknown }>;
   };
 }
 

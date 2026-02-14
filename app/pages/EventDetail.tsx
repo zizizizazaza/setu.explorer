@@ -141,7 +141,7 @@ export const EventDetail = ({ eventId, onNavigate }: EventDetailProps) => {
               </div>
             </section>
 
-            <section className="bg-white rounded-2xl p-6 text-slate-900 shadow-sm relative border border-slate-200 border-t-4 border-t-indigo-600">
+            <section className="bg-white rounded-2xl p-6 text-slate-900 shadow-sm relative border border-slate-200 border-t-4 border-t-indigo-600 overflow-hidden min-w-0">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <Cpu size={120} className="text-slate-900" />
               </div>
@@ -154,18 +154,34 @@ export const EventDetail = ({ eventId, onNavigate }: EventDetailProps) => {
                 <p className="text-slate-600 text-xs font-medium leading-relaxed italic bg-slate-50 p-4 rounded-xl border border-slate-100">
                   {event.execution_result?.message}
                 </p>
-                <div className="space-y-3 pt-4">
+                <div className="space-y-3 pt-4 overflow-hidden">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">State Delta</p>
-                  {event.execution_result?.state_changes.map((sc, i) => (
-                    <div key={i} className="flex flex-col gap-2 bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:border-indigo-500 transition-colors">
-                      <span className="text-[10px] font-mono text-indigo-600 font-bold">{sc.key}</span>
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-100">{sc.old_value}</span>
-                        <ArrowRight size={14} className="text-slate-300" />
-                        <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100 font-bold">{sc.new_value}</span>
+                  {event.execution_result?.state_changes.map((sc, i) => {
+                    const oldStr = typeof sc.old_value === 'object' ? JSON.stringify(sc.old_value, null, 2) : String(sc.old_value ?? '');
+                    const newStr = typeof sc.new_value === 'object' ? JSON.stringify(sc.new_value, null, 2) : String(sc.new_value ?? '');
+                    return (
+                      <div key={i} className="flex flex-col gap-2 bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:border-indigo-500 transition-colors overflow-hidden min-w-0">
+                        <span className="text-[10px] font-mono text-indigo-600 font-bold truncate" title={sc.key}>{sc.key}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-stretch gap-2 min-w-0">
+                          <div className="flex-1 min-w-0 flex flex-col">
+                            <span className="text-[9px] font-black text-slate-400 uppercase mb-0.5">Old</span>
+                            <div className="text-[11px] font-mono text-red-600 bg-red-50/80 px-2 py-1.5 rounded border border-red-100 overflow-x-auto overflow-y-auto max-h-32 break-all whitespace-pre-wrap">
+                              {oldStr}
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 flex items-center justify-center sm:py-4">
+                            <ArrowRight size={14} className="text-slate-300" />
+                          </div>
+                          <div className="flex-1 min-w-0 flex flex-col">
+                            <span className="text-[9px] font-black text-slate-400 uppercase mb-0.5">New</span>
+                            <div className="text-[11px] font-mono text-green-700 bg-green-50/80 px-2 py-1.5 rounded border border-green-100 overflow-x-auto overflow-y-auto max-h-32 break-all whitespace-pre-wrap font-medium">
+                              {newStr}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </section>
@@ -212,8 +228,8 @@ export const EventDetail = ({ eventId, onNavigate }: EventDetailProps) => {
                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Raw Payload</h4>
                 <button className="text-[10px] font-bold text-indigo-600 hover:underline uppercase">Copy JSON</button>
               </div>
-              <div className="bg-slate-100 p-6 rounded-2xl shadow-inner border border-slate-200 max-h-60 overflow-y-auto">
-                <pre className="text-[11px] font-mono text-slate-700 leading-relaxed whitespace-pre-wrap">
+              <div className="bg-slate-100 p-6 rounded-2xl shadow-inner border border-slate-200 max-h-60 overflow-auto">
+                <pre className="text-[11px] font-mono text-slate-700 leading-relaxed whitespace-pre-wrap break-all min-w-0">
                   {JSON.stringify(event.payload, null, 2)}
                 </pre>
               </div>

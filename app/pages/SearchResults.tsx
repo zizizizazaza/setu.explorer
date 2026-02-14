@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Activity, Database, Box } from 'lucide-react';
+import { User, Activity, Database, Box, Server, Cpu } from 'lucide-react';
 import { fetchSearch } from '../api';
 import type { SearchResultItem } from '../api/types';
 
@@ -38,13 +38,28 @@ export const SearchResults = ({ query, onNavigate }: SearchResultsProps) => {
   const goTo = (item: SearchResultItem) => {
     if (item.type === 'anchor') onNavigate('anchor_detail', item.id);
     else if (item.type === 'event') onNavigate('event_detail', item.id);
-    else if (item.type === 'account') onNavigate('account_detail', item.id ?? item.address ?? item.id);
+    else if (item.type === 'account') onNavigate('account_detail', item.address ?? item.id);
+    else if (item.type === 'validator' || item.type === 'solver') onNavigate('validators');
+    else onNavigate('event_detail', item.id);
   };
 
-  const iconMap = {
+  // 仅 1 条结果时自动跳转到对应详情页，避免多一次点击
+  useEffect(() => {
+    if (loading || !results || results.length !== 1) return;
+    const item = results[0];
+    if (item.type === 'anchor') onNavigate('anchor_detail', item.id);
+    else if (item.type === 'event') onNavigate('event_detail', item.id);
+    else if (item.type === 'account') onNavigate('account_detail', item.address ?? item.id);
+    else if (item.type === 'validator' || item.type === 'solver') onNavigate('validators');
+    else onNavigate('event_detail', item.id);
+  }, [loading, results, onNavigate]);
+
+  const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
     anchor: Box,
     event: Activity,
-    account: User
+    account: User,
+    validator: Server,
+    solver: Cpu,
   };
 
   if (loading) {
