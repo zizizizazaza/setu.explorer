@@ -111,7 +111,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
                   </div>
                   <div className="text-right relative z-10">
                     <div className="text-sm text-slate-700 font-medium">{anchor.event_count} txns</div>
-                    <div className="text-[10px] text-slate-400">{new Date(anchor.timestamp).toLocaleTimeString()}</div>
+                    <div className="text-[10px] text-slate-400">{new Date(anchor.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</div>
                   </div>
                 </div>
               ))}

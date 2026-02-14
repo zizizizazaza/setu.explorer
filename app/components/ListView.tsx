@@ -109,7 +109,7 @@ export const ListView = ({ title, type, onNavigate }: ListViewProps) => {
                     <>
                       <td className="px-6 py-4 font-black text-slate-900 text-sm">#{item.depth}</td>
                       <td className="px-6 py-4 font-mono text-indigo-600 font-bold">{item.id.slice(0, 16)}...</td>
-                      <td className="px-6 py-4 text-slate-500">{new Date(item.timestamp).toLocaleTimeString()}</td>
+                      <td className="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">{new Date(item.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
                       <td className="px-6 py-4 font-bold">{item.event_count} txs</td>
                       <td className="px-6 py-4 text-slate-400 font-mono text-[10px]">{item.proposer}</td>
                       <td className="px-6 py-4"><Badge status={item.status}>{item.status}</Badge></td>
@@ -118,7 +118,7 @@ export const ListView = ({ title, type, onNavigate }: ListViewProps) => {
                     <>
                       <td className="px-6 py-4 font-mono text-indigo-600 font-bold">{item.id.slice(0, 16)}...</td>
                       <td className="px-6 py-4 font-black text-slate-800">{item.type}</td>
-                      <td className="px-6 py-4 text-slate-500">{new Date(item.timestamp).toLocaleTimeString()}</td>
+                      <td className="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">{new Date(item.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 bg-slate-100 rounded-md font-black text-indigo-600">#{item.anchor_depth}</span>
                       </td>
