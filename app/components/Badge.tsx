@@ -3,11 +3,11 @@ import React from 'react';
 export const Badge = ({ children, status }: { children?: React.ReactNode; status?: string }) => {
   const getStyles = () => {
     switch (status?.toLowerCase()) {
-      case 'finalized': return 'bg-green-100 text-green-700 border-green-200';
-      case 'confirmed': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'failed': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+      case 'finalized': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'confirmed': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+      case 'pending': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'failed': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+      default: return 'bg-white/5 text-white/50 border-white/10';
     }
   };
   return (

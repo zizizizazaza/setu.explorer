@@ -11,6 +11,7 @@ import { AnchorDetail } from './pages/AnchorDetail';
 import { EventDetail } from './pages/EventDetail';
 import { AccountDetail } from './pages/AccountDetail';
 import { SearchResults } from './pages/SearchResults';
+import { Starfield } from './components/Starfield';
 
 
 function getPathForRoute(path: string, id?: string): string {
@@ -59,10 +60,11 @@ const AppContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
+    <div className={`min-h-screen font-sans text-white selection:bg-indigo-500 selection:text-white ${location.pathname === '/' ? 'bg-black' : 'bg-transparent'}`}>
+      {location.pathname !== '/' && <Starfield />}
       <Navbar onNavigate={handleNavigate} currentPath={currentPath} />
 
-      <main className="max-w-7xl mx-auto px-6 pt-24 pb-10 min-h-[70vh]">
+      <main className={location.pathname === '/' ? 'w-full' : 'relative z-10 max-w-7xl mx-auto px-6 pt-24 pb-10 min-h-[70vh]'}>
         <Routes>
           <Route path="/" element={<LandingPage onNavigate={handleNavigate} />} />
           <Route path="/dashboard" element={<Dashboard onNavigate={handleNavigate} />} />

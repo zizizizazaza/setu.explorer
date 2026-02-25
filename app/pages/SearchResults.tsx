@@ -64,15 +64,15 @@ export const SearchResults = ({ query, onNavigate }: SearchResultsProps) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[200px] text-slate-500 text-sm font-medium">Searching...</div>
+      <div className="flex items-center justify-center min-h-[200px] text-white/50 text-sm font-medium">Searching...</div>
     );
   }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Search Results</h2>
-        <p className="text-slate-400 text-sm font-medium mt-1">Showing matches for: <span className="text-indigo-600 font-mono">"{query}"</span></p>
+        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Search Results</h2>
+        <p className="text-white/40 text-sm font-medium mt-1">Showing matches for: <span className="text-indigo-400 font-mono">"{query}"</span></p>
       </div>
 
       {results && results.length > 0 ? (
@@ -82,18 +82,18 @@ export const SearchResults = ({ query, onNavigate }: SearchResultsProps) => {
             return (
               <section
                 key={`${item.type}-${item.id}-${i}`}
-                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4 hover:border-indigo-300 transition-colors cursor-pointer"
+                className="bg-black/70 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.4)] flex items-start gap-4 hover:border-indigo-500/50 transition-all cursor-pointer group"
                 onClick={() => goTo(item)}
               >
-                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                <div className="p-3 bg-white/5 text-indigo-400 border border-white/10 rounded-xl group-hover:bg-indigo-500/10 group-hover:border-indigo-500/30 transition-all">
                   <Icon size={24} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.type} Match</p>
-                  <h4 className="font-black text-slate-900 truncate">{item.id}</h4>
-                  {item.depth != null && <p className="text-xs text-slate-500 mt-1">Depth #{item.depth}</p>}
-                  {item.event_count != null && <p className="text-xs text-slate-500 mt-1">{item.event_count} events</p>}
-                  {item.status != null && <p className="text-xs text-slate-500 mt-1">{item.status}</p>}
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 group-hover:text-white/60 transition-colors">{item.type} Match</p>
+                  <h4 className="font-black text-white truncate">{item.id}</h4>
+                  {item.depth != null && <p className="text-xs text-white/50 mt-1">Depth #{item.depth}</p>}
+                  {item.event_count != null && <p className="text-xs text-white/50 mt-1">{item.event_count} events</p>}
+                  {item.status != null && <p className="text-xs text-white/50 mt-1">{item.status}</p>}
                 </div>
               </section>
             );
@@ -102,29 +102,29 @@ export const SearchResults = ({ query, onNavigate }: SearchResultsProps) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <section
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4 hover:border-indigo-300 transition-colors cursor-pointer"
+            className="bg-black/70 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.4)] flex items-start gap-4 hover:border-indigo-500/50 transition-all cursor-pointer group"
             onClick={() => onNavigate('account_detail', query)}
           >
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+            <div className="p-3 bg-white/5 text-indigo-400 border border-white/10 rounded-xl group-hover:bg-indigo-500/10 group-hover:border-indigo-500/30 transition-all">
               <User size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account Match</p>
-              <h4 className="font-black text-slate-900">{query.slice(0, 16)}...</h4>
-              <p className="text-xs text-slate-500 mt-1">Click to view balance and event history.</p>
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 group-hover:text-white/60 transition-colors">Account Match</p>
+              <h4 className="font-black text-white">{query.slice(0, 16)}...</h4>
+              <p className="text-xs text-white/50 mt-1">Click to view balance and event history.</p>
             </div>
           </section>
           <section
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4 hover:border-indigo-300 transition-colors cursor-pointer"
+            className="bg-black/70 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.4)] flex items-start gap-4 hover:border-indigo-500/50 transition-all cursor-pointer group"
             onClick={() => onNavigate('event_detail', query.startsWith('ev_') ? query : `ev_${query}`)}
           >
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
+            <div className="p-3 bg-white/5 text-amber-400 border border-white/10 rounded-xl group-hover:bg-amber-500/10 group-hover:border-amber-500/30 transition-all">
               <Activity size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Event Match</p>
-              <h4 className="font-black text-slate-900">Event {query.toUpperCase()}</h4>
-              <p className="text-xs text-slate-500 mt-1">Click to view DAG relationship and execution result.</p>
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 group-hover:text-white/60 transition-colors">Event Match</p>
+              <h4 className="font-black text-white">Event {query.toUpperCase()}</h4>
+              <p className="text-xs text-white/50 mt-1">Click to view DAG relationship and execution result.</p>
             </div>
           </section>
         </div>

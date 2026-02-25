@@ -55,81 +55,83 @@ export const ListView = ({ title, type, onNavigate }: ListViewProps) => {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight capitalize">{title}</h1>
-          <p className="text-slate-400 text-[11px] font-bold mt-1">Real-time Setu stream index</p>
+          <h1 className="text-2xl font-black text-white tracking-tight capitalize">{title}</h1>
+          <p className="text-white/40 text-[11px] font-bold mt-1">Real-time Setu stream index</p>
         </div>
-        <div className="flex items-center gap-3 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-3 bg-white/5 p-1 rounded-[10px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] backdrop-blur-md">
           <button
             disabled={currentPage === 1 || loading}
             onClick={() => setCurrentPage(p => p - 1)}
-            className="p-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            className="p-1.5 hover:bg-white/10 text-white/70 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="px-4 text-[10px] font-black text-slate-700 uppercase">Page {currentPage} / {totalPages}</span>
+          <span className="px-4 text-[10px] font-black text-white/80 uppercase">Page {currentPage} / {totalPages}</span>
           <button
             disabled={currentPage === totalPages || loading}
             onClick={() => setCurrentPage(p => p + 1)}
-            className="p-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            className="p-1.5 hover:bg-white/10 text-white/70 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
           >
             <ChevronRight size={16} />
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden border-b-4 border-b-slate-200">
-        {loading && items.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 text-sm font-medium">Loading...</div>
-        ) : (
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-400 font-black border-b border-slate-200 uppercase text-[10px]">
-              {type === 'anchors' ? (
-                <tr>
-                  <th className="px-6 py-5">Depth Index</th>
-                  <th className="px-6 py-5">ID (Hash)</th>
-                  <th className="px-6 py-5">Chronology</th>
-                  <th className="px-6 py-5">Event Payload</th>
-                  <th className="px-6 py-5">Proposer</th>
-                  <th className="px-6 py-5">State</th>
-                </tr>
-              ) : (
-                <tr>
-                  <th className="px-6 py-5">Event ID</th>
-                  <th className="px-6 py-5">Type / Tag</th>
-                  <th className="px-6 py-5">Chronology</th>
-                  <th className="px-6 py-5">Anchor Association</th>
-                  <th className="px-6 py-5">Finality</th>
-                </tr>
-              )}
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {items.map((item: any) => (
-                <tr key={item.id} className="hover:bg-indigo-50/30 transition-colors group cursor-pointer" onClick={() => onNavigate(type === 'anchors' ? 'anchor_detail' : 'event_detail', item.id)}>
-                  {type === 'anchors' ? (
-                    <>
-                      <td className="px-6 py-4 font-black text-slate-900 text-sm">#{item.depth}</td>
-                      <td className="px-6 py-4 font-mono text-indigo-600 font-bold">{item.id.slice(0, 16)}...</td>
-                      <td className="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">{new Date(item.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
-                      <td className="px-6 py-4 font-bold">{item.event_count} txs</td>
-                      <td className="px-6 py-4 text-slate-400 font-mono text-[10px]">{item.proposer}</td>
-                      <td className="px-6 py-4"><Badge status={item.status}>{item.status}</Badge></td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-6 py-4 font-mono text-indigo-600 font-bold">{item.id.slice(0, 16)}...</td>
-                      <td className="px-6 py-4 font-black text-slate-800">{item.type}</td>
-                      <td className="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">{new Date(item.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 bg-slate-100 rounded-md font-black text-indigo-600">#{item.anchor_depth}</span>
-                      </td>
-                      <td className="px-6 py-4"><Badge status={item.status}>{item.status}</Badge></td>
-                    </>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+        <div className="relative z-10">
+          {loading && items.length === 0 ? (
+            <div className="p-12 text-center text-white/20 text-sm font-black uppercase tracking-widest">Loading...</div>
+          ) : (
+            <table className="w-full text-left text-xs relative">
+              <thead className="bg-white/5 text-white/30 font-black border-b border-white/5 uppercase text-[10px] tracking-widest">
+                {type === 'anchors' ? (
+                  <tr>
+                    <th className="px-6 py-5">Depth Index</th>
+                    <th className="px-6 py-5">ID (Hash)</th>
+                    <th className="px-6 py-5">Chronology</th>
+                    <th className="px-6 py-5">Event Payload</th>
+                    <th className="px-6 py-5">Proposer</th>
+                    <th className="px-6 py-5">State</th>
+                  </tr>
+                ) : (
+                  <tr>
+                    <th className="px-6 py-5">Event ID</th>
+                    <th className="px-6 py-5">Type / Tag</th>
+                    <th className="px-6 py-5">Chronology</th>
+                    <th className="px-6 py-5">Anchor Association</th>
+                    <th className="px-6 py-5">Finality</th>
+                  </tr>
+                )}
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {items.map((item: any) => (
+                  <tr key={item.id} className="hover:bg-white/[0.05] even:bg-white/[0.01] transition-colors group cursor-pointer border-b border-white/[0.02] last:border-0" onClick={() => onNavigate(type === 'anchors' ? 'anchor_detail' : 'event_detail', item.id)}>
+                    {type === 'anchors' ? (
+                      <>
+                        <td className="px-6 py-4 font-black text-white text-sm">#{item.depth}</td>
+                        <td className="px-6 py-4 font-mono text-indigo-400 font-bold group-hover:text-indigo-300 transition-colors">{item.id.slice(0, 16)}...</td>
+                        <td className="px-6 py-4 text-white/50 text-xs whitespace-nowrap">{new Date(item.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+                        <td className="px-6 py-4 font-bold text-white/80">{item.event_count} txs</td>
+                        <td className="px-6 py-4 text-white/40 font-mono text-[10px]">{item.proposer}</td>
+                        <td className="px-6 py-4"><Badge status={item.status}>{item.status}</Badge></td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-6 py-4 font-mono text-indigo-400 font-bold group-hover:text-indigo-300 transition-colors">{item.id.slice(0, 16)}...</td>
+                        <td className="px-6 py-4 font-black text-white/90">{item.type}</td>
+                        <td className="px-6 py-4 text-white/50 text-xs whitespace-nowrap">{new Date(item.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 bg-white/10 rounded-md font-black text-indigo-400">#{item.anchor_depth}</span>
+                        </td>
+                        <td className="px-6 py-4"><Badge status={item.status}>{item.status}</Badge></td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

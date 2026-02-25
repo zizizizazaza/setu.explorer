@@ -54,27 +54,27 @@ export const Footer = ({ onNavigate }: FooterProps) => {
   ];
 
   return (
-    <footer className="mt-20 border-t border-slate-200 bg-slate-50">
-      <div className="max-w-[1440px] mx-auto px-6 py-16">
+    <footer className="relative z-10 mt-20 border-t border-white/5 bg-white/[0.03] backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+      <div className="max-w-[1440px] mx-auto px-6 py-16 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="space-y-6">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('landing')}>
               <img
                 src="/setu-logo.png"
                 alt="Setu"
-                className="h-6 w-auto object-contain"
+                className="h-6 w-auto object-contain brightness-0 invert"
               />
-              <span className="text-md font-bold text-slate-900 tracking-tighter">
-                SETU<span className="text-indigo-600 italic ml-1">EXPLORER</span>
+              <span className="text-md font-black text-white tracking-tighter">
+                SETU<span className="text-white/70 italic ml-1 font-black">EXPLORER</span>
               </span>
             </div>
-            <p className="text-slate-500 text-[11px] leading-relaxed font-bold max-w-xl">
+            <p className="text-white/40 text-[11px] leading-relaxed font-bold max-w-xl uppercase tracking-wider">
               The foundational explorer for high-throughput DAG systems using VLC-ordered causal consistency.
             </p>
           </div>
 
           <div className="lg:justify-self-end">
-            <h4 className="text-[11px] font-black text-indigo-600 tracking-widest mb-6">Community</h4>
+            <h4 className="text-[10px] font-black text-white/30 tracking-[0.3em] uppercase mb-6">Connect</h4>
             <div className="flex flex-wrap gap-3">
               {socialLinks.map((item) => {
                 const Icon = item.icon;
@@ -86,9 +86,9 @@ export const Footer = ({ onNavigate }: FooterProps) => {
                     rel="noopener noreferrer"
                     aria-label={item.name}
                     title={item.name}
-                    className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:text-indigo-600 hover:border-indigo-600 transition-all shadow-sm"
+                    className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-white/20 hover:text-white hover:border-white/20 hover:bg-white/10 transition-all shadow-sm group"
                   >
-                    <Icon size={16} />
+                    <Icon size={16} className="group-hover:scale-110 transition-transform" />
                   </a>
                 );
               })}
@@ -96,8 +96,8 @@ export const Footer = ({ onNavigate }: FooterProps) => {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[9px] font-bold text-slate-400 tracking-widest">© 2025 SETU BLOCKLESS EXPLORER. POWERED BY FLUX.</p>
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[9px] font-black text-white/20 tracking-[0.4em] uppercase">© 2025 SETU BLOCKLESS EXPLORER. POWERED BY FLUX.</p>
         </div>
       </div>
     </footer>

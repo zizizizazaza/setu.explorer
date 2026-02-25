@@ -1,87 +1,128 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ArrowRight, GitBranch, Box, Zap, Clock3, ShieldCheck, MapPin, History, User, Cpu, TrendingUp } from 'lucide-react';
+import { Canvas } from '@react-three/fiber';
+import { ParticleSphere } from '../components/ParticleSphere';
+import { motion, useScroll, useTransform, animate, useInView } from 'framer-motion';
 
-const TechnicalSpec = ({ number, title, desc, tag }: { number: string; title: string; desc: string; tag: string }) => (
-  <div className="spec-card group border-t border-slate-100 py-12 flex flex-col md:flex-row gap-8 px-4">
+const TechnicalSpec: React.FC<{ number: string; title: string; desc: string; tag: string }> = ({ number, title, desc, tag }) => (
+  <div className="spec-card group border-t border-white/10 py-12 flex flex-col md:flex-row gap-8 px-6 hover:bg-white/[0.02] transition-colors rounded-2xl">
     <div className="md:w-40 shrink-0">
-      <span className="spec-number text-[10px] font-mono font-bold text-slate-400 tracking-[0.2em] block">{number}</span>
+      <span className="spec-number text-[10px] font-mono font-bold text-white/40 tracking-[0.2em] block">{number}</span>
     </div>
     <div className="flex-1 space-y-3">
       <div className="flex items-center gap-4">
-        <h3 className="text-xl font-bold text-slate-900 tracking-tight">{title}</h3>
-        <span className="text-[9px] font-mono bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-wider group-hover:bg-indigo-600 group-hover:text-white transition-colors">{tag}</span>
+        <h3 className="text-xl font-bold text-white tracking-wide">{title}</h3>
+        <span className="text-[10px] bg-white/5 border border-white/10 text-white/60 px-3 py-1 rounded-full uppercase tracking-wider group-hover:bg-indigo-500 group-hover:border-indigo-500 group-hover:text-white transition-all">{tag}</span>
       </div>
-      <p className="text-slate-500 text-sm leading-relaxed max-w-2xl font-medium">
+      <p className="text-white/50 text-sm leading-relaxed max-w-2xl font-medium">
         {desc}
       </p>
     </div>
   </div>
 );
 
+const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: false, margin: "-50px" });
+
+  useEffect(() => {
+    if (inView && ref.current) {
+      const controls = animate(0, value, {
+        duration: 2.5,
+        ease: "easeOut",
+        onUpdate: (latest) => {
+          if (ref.current) {
+            ref.current.textContent = Math.floor(latest) + suffix;
+          }
+        },
+      });
+      return () => controls.stop();
+    } else if (ref.current && !inView) {
+      ref.current.textContent = "0" + suffix;
+    }
+  }, [inView, value, suffix]);
+
+  return <span ref={ref}>0{suffix}</span>;
+};
+
+const ScrambleText = ({ text }: { text: string }) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_*#@';
+  const [displayText, setDisplayText] = useState(text);
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: false, margin: "-50px" });
+
+  useEffect(() => {
+    if (!inView) {
+      setDisplayText(text.split('').map(c => c === ' ' ? ' ' : chars[Math.floor(Math.random() * chars.length)]).join(''));
+      return;
+    }
+
+    let iteration = 0;
+    const interval = setInterval(() => {
+      setDisplayText(() => text.split('').map((char, index) => {
+        if (char === ' ') return char;
+        if (index < iteration) {
+          return text[index];
+        }
+        return chars[Math.floor(Math.random() * chars.length)];
+      }).join(''));
+
+      if (iteration >= text.length) {
+        clearInterval(interval);
+      }
+
+      iteration += 1 / 8; // Slower reveal (was 1/3)
+    }, 40); // Slightly slower tick
+
+    return () => clearInterval(interval);
+  }, [inView, text]);
+
+  return <span ref={ref} className="inline-block tabular-nums">{displayText}</span>;
+};
+
 const PerformanceSection = () => (
-  <section className="bg-white py-32 overflow-hidden relative border-b border-slate-100">
-    <div className="absolute inset-0 grid-pattern opacity-60" />
-    <div className="glow-orb top-[-10%] right-[-5%] w-[600px] h-[600px] bg-indigo-500/5" style={{ animation: 'pulse-soft 8s ease-in-out infinite' }} />
-    <div className="glow-orb bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-blue-500/5" style={{ animation: 'pulse-soft 10s ease-in-out infinite reverse' }} />
-    <div className="max-w-[1440px] mx-auto px-8 relative z-10">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-        <div className="space-y-10 group">
-          <div className="space-y-4">
-            <h2 className="text-sm font-mono font-bold text-indigo-600 uppercase tracking-[0.4em] flex items-center gap-2">
-              <span className="w-8 h-px bg-indigo-200 group-hover:w-12 transition-all" />
-              Performance Benchmark
-            </h2>
-            <h3 className="text-5xl md:text-6xl font-bold text-slate-900 tracking-tighter leading-tight">
-              Extreme Scale. <br />
-              Deterministic Flow.
-            </h3>
-          </div>
-          <p className="text-slate-500 text-lg leading-relaxed max-w-xl font-medium border-l-2 border-indigo-50 pl-6">
-            Setu achieves massive parallel processing through <span className="text-slate-900 italic font-semibold">DAG architecture</span> and <span className="text-slate-900 italic font-semibold">VLC synchronization</span>.
-            By decoupling consensus from execution, the network scales linearly to meet any demand.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-6">
-            <div className="space-y-3 relative group/stat">
-              <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-black text-indigo-600 tracking-tighter tabular-nums drop-shadow-sm">200K</span>
-                <span className="text-slate-400 font-bold text-xl uppercase tracking-widest">TPS</span>
-              </div>
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] group-hover/stat:text-indigo-500 transition-colors">Ideal Infrastructure</div>
-              <div className="absolute -left-4 top-0 bottom-0 w-[2px] bg-indigo-500 scale-y-0 group-hover/stat:scale-y-100 transition-transform origin-top duration-300" />
+  <section className="relative py-40 font-mono z-10 pointer-events-none flex flex-col items-center justify-center min-h-[80vh]">
+    <div className="max-w-[1440px] mx-auto px-8 relative z-10 w-full flex flex-col items-center text-center">
+
+      {/* Title & Description */}
+      <div className="space-y-12 max-w-3xl pointer-events-auto flex flex-col items-center">
+
+        <h3 className="text-4xl md:text-5xl lg:text-6xl font-light text-white tracking-widest leading-[1.15] uppercase pt-4" style={{ fontFamily: "'Outfit', sans-serif" }}>
+          EXTREME SCALE. <br />
+          <span className="font-bold">HYPER PERFORMANCE.</span>
+        </h3>
+
+        {/* Metrics Layout (Centered) */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-20 py-8 pointer-events-auto w-full">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-2">IDEAL INFRASTRUCTURE</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-7xl lg:text-8xl font-bold text-indigo-400 tracking-tight tabular-nums drop-shadow-lg" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                <AnimatedNumber value={200} suffix="K" />
+              </span>
+              <span className="text-white/40 font-bold text-xs uppercase tracking-widest">TPS</span>
             </div>
-            <div className="space-y-3 opacity-60 hover:opacity-100 transition-opacity">
-              <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-black text-slate-400 tracking-tighter tabular-nums">50K</span>
-                <span className="text-slate-400 font-bold text-xl uppercase tracking-widest">TPS</span>
-              </div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em]">High Contention / Load</div>
+          </div>
+
+          <div className="hidden md:block w-px h-24 bg-white/10" />
+
+          <div className="flex flex-col items-center space-y-4 opacity-80">
+            <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-2">HIGH CONTENTION / LOAD</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-7xl lg:text-8xl font-bold text-slate-300 tracking-tight tabular-nums drop-shadow-lg" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                <AnimatedNumber value={50} suffix="K" />
+              </span>
+              <span className="text-white/40 font-bold text-xs uppercase tracking-widest">TPS</span>
             </div>
           </div>
         </div>
-        <div className="relative group">
-          <div className="absolute inset-0 bg-indigo-600/5 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative bg-white/50 backdrop-blur-sm border border-slate-200 rounded-3xl p-10 space-y-12 shadow-xl shadow-slate-100/50">
-            {[
-              { title: 'Parallel Execution Fabric', desc: 'DAG-based event ordering eliminates sequential locks, allowing independent transactions to process at silicon speed.', icon: GitBranch },
-              { title: 'Validator-Solver Decoupling', desc: 'Consensus is isolated from execution. Multiple TEE Solver nodes execute concurrently while Validators handle global pulse.', icon: Cpu },
-              { title: 'Elastic Linear Scaling', desc: 'Throughput grows linearly with hardware allocation. Simply add Solver nodes to expand network capacity on-demand.', icon: TrendingUp },
-            ].map((feature, i) => (
-              <div key={i} className="flex gap-8 group/item">
-                <div className="shrink-0 w-14 h-14 bg-white shadow-lg shadow-indigo-100 border border-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center group-hover/item:scale-110 group-hover/item:rotate-3 transition-all duration-500">
-                  <feature.icon size={24} />
-                </div>
-                <div className="space-y-2">
-                  <h4 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    {feature.title}
-                    <div className="h-1 w-0 bg-indigo-500 group-hover/item:w-6 transition-all" />
-                  </h4>
-                  <p className="text-slate-500 text-sm leading-relaxed font-medium">{feature.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
+        <p className="text-white/60 text-[11px] leading-relaxed max-w-xl uppercase tracking-widest">
+          Setu achieves massive parallel processing through <span className="text-white font-bold">DAG architecture</span> and <span className="text-white font-bold">VLC synchronization</span>.
+          By decoupling consensus from execution, the network scales linearly to meet any demand.
+        </p>
       </div>
+
     </div>
   </section>
 );
@@ -91,6 +132,9 @@ interface LandingPageProps {
 }
 
 export const LandingPage = ({ onNavigate }: LandingPageProps) => {
+  const { scrollYProgress } = useScroll();
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+
   const vlcFeatures = [
     { title: "Precise Relation", desc: "Accurately judge the happens-before relationship between any two events in a distributed environment.", icon: Clock3 },
     { title: "Conflict Detection", desc: "Automatically identify concurrent events to prevent state conflicts and ensure deterministic outcomes.", icon: ShieldCheck },
@@ -99,187 +143,218 @@ export const LandingPage = ({ onNavigate }: LandingPageProps) => {
   ];
 
   return (
-    <div className="bg-white min-h-screen selection:bg-indigo-600 selection:text-white relative">
-      <div className="fixed inset-0 grid-pattern opacity-40 pointer-events-none z-0" />
-      <section className="relative pt-24 pb-32 border-b border-slate-100 overflow-hidden z-10">
-        <div className="glow-orb top-[-10%] left-[-10%] w-[800px] h-[800px] bg-indigo-100/40" style={{ animation: 'float-slow 12s ease-in-out infinite' }} />
-        <div className="glow-orb bottom-[10%] right-[-10%] w-[600px] h-[600px] bg-blue-50/30" style={{ animation: 'float-slow 15s ease-in-out infinite reverse' }} />
-        <div className="max-w-[1440px] mx-auto px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="space-y-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 text-white rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-xl animate-pulse">
-                <Zap size={12} className="fill-indigo-400 text-indigo-400" />
-                Network Live
-              </div>
-              <h1 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-[-0.04em] leading-[1.1] drop-shadow-sm">
-                The Deterministic <br />
-                <span className="text-indigo-600 relative inline-block">
-                  Causal Network
-                  <div className="absolute -bottom-2 left-0 w-full h-[6px] bg-indigo-100 -z-10 rotate-[-1deg]" />
-                </span>
+    <div className="bg-black min-h-screen selection:bg-indigo-500 selection:text-white relative">
+
+      {/* Global Particle Sphere Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+          <ParticleSphere />
+        </Canvas>
+      </div>
+
+      {/* Hero Section - Axis Robotics Style */}
+      <section className="relative min-h-[90vh] flex flex-col justify-between overflow-visible font-mono px-8 pt-10 pb-4 z-10">
+        <div className="max-w-[1440px] mx-auto px-8 relative z-10 w-full flex-grow flex items-end">
+          <motion.div style={{ opacity: heroOpacity }} className="relative z-10 flex flex-col lg:flex-row justify-between items-end gap-12 w-full pb-0">
+            <div className="max-w-2xl">
+              <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-light text-white tracking-normal uppercase leading-[1.1] mix-blend-difference">
+                THE DETERMINISTIC <br />
+                <span className="text-white font-bold"><ScrambleText text="CAUSAL NETWORK" /></span>
               </h1>
-              <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed max-w-xl">
-                Setu decouples consensus from execution via <span className="text-slate-900 font-semibold underline decoration-indigo-200 underline-offset-4">VLC</span> and <span className="text-slate-900 font-semibold underline decoration-indigo-200 underline-offset-4">DAG</span>,
-                establishing a high-throughput backbone for verifiable digital causality.
+            </div>
+
+            <div className="max-w-sm space-y-8 lg:text-right flex flex-col items-start lg:items-end w-full mix-blend-difference">
+              <p className="text-white/60 text-[11px] uppercase tracking-widest leading-relaxed">
+                Setu decouples consensus from execution via <span className="text-white">VLC</span> and <span className="text-white">DAG</span>, establishing a high-throughput backbone for verifiable digital causality.
               </p>
-              <div className="flex items-center gap-6 pt-4">
+              <div className="flex items-center gap-6">
+                <button className="text-white text-xs font-bold tracking-widest uppercase hover:text-indigo-400 transition-colors flex items-center gap-2 group pointer-events-auto">
+                  READ PAPER <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform opacity-50 group-hover:opacity-100" />
+                </button>
                 <button
                   onClick={() => onNavigate('dashboard')}
-                  className="px-10 py-5 bg-slate-900 text-white font-bold text-[11px] tracking-[0.2em] uppercase hover:bg-indigo-600 transition-all rounded shadow-2xl shadow-slate-200 hover:-translate-y-1 active:scale-95"
+                  className="px-6 py-3 bg-indigo-600 text-white font-bold text-xs tracking-widest uppercase hover:bg-white hover:text-indigo-600 transition-colors pointer-events-auto rounded-none"
                 >
-                  Start Explore
-                </button>
-                <button className="text-slate-400 font-bold text-[11px] tracking-[0.2em] uppercase hover:text-slate-900 transition-colors flex items-center gap-2 group">
-                  Whitepaper <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                  INIT EXPLORE
                 </button>
               </div>
             </div>
-            <div className="relative select-none h-full flex items-center justify-end group">
-              <div className="relative w-full h-full max-w-xl">
-                <div className="absolute inset-0 bg-indigo-500/5 rounded-full blur-[80px] -z-10 scale-0 group-hover:scale-100 transition-transform duration-1000" />
-                <img
-                  src="/hero_visual.png"
-                  alt=""
-                  className="w-full h-full object-contain object-right opacity-90 transition-all duration-1000 group-hover:scale-[1.02]"
-                  style={{
-                    maskImage: 'linear-gradient(to left, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)'
-                  }}
-                />
-                <div className="absolute top-1/2 right-0 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] -z-10" />
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
+
+        {/* Scroll Down Indicator */}
+        <motion.div style={{ opacity: heroOpacity }} className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+          <div className="animate-bounce">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" className="text-white/60">
+              <path d="M10 4 L10 14 M5 10 L10 15 L15 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </motion.div>
       </section>
 
       <PerformanceSection />
 
-      <section className="max-w-[1440px] mx-auto px-8 py-32 grid grid-cols-1 lg:grid-cols-12 gap-16">
-        <div className="lg:col-span-4 space-y-6">
-          <h2 className="text-xs font-mono font-bold text-indigo-600 uppercase tracking-[0.4em]">Engine Core</h2>
-          <p className="text-2xl font-bold text-slate-900 tracking-tight leading-tight italic">
-            De-sequentialized <br />
-            infrastructure for <br />
-            autonomous agents.
-          </p>
-          <div className="h-20 w-px bg-slate-100 hidden lg:block ml-1 mt-8"></div>
-        </div>
-        <div className="lg:col-span-8">
-          {[
-            { number: '01', tag: 'DAG Fabric', title: 'Asynchronous Causality', desc: 'Shattering sequential bottlenecks. Each event transition centers on parent-child lineage, enabling massive parallel state processing without central locks.' },
-            { number: '02', tag: 'VLC Sync', title: 'Vector Logical Clocks', desc: 'Deterministic ordering in an asynchronous world. VLC provides precise partial ordering for cross-subnet events with sub-millisecond overhead.' },
-            { number: '03', tag: 'TEE Compute', title: 'Silicon-Level Integrity', desc: 'Validator nodes operate within Trusted Execution Environments, ensuring hardware-verified execution for complex causal flows.' },
-            { number: '04', tag: 'Global Anchor', title: 'Deterministic Finality', desc: 'Periodic Anchors solidify the state, condensing the DAG into immutable truth points for optimized history synchronization.' },
-          ].map((spec) => (
-            <div key={spec.number}>
-              <TechnicalSpec number={spec.number} tag={spec.tag} title={spec.title} desc={spec.desc} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="max-w-[1440px] mx-auto px-8 py-32 border-b border-slate-100">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
-          <div className="space-y-12">
-            <div className="space-y-4">
-              <h2 className="text-sm font-mono font-bold text-indigo-600 uppercase tracking-[0.4em]">Hybrid Architecture</h2>
-              <h3 className="text-4xl font-bold text-slate-900 tracking-tight leading-tight">
-                Merging Parallel Flow <br />
-                with Deterministic Finality.
-              </h3>
-            </div>
-            <div className="space-y-10">
-              <div className="group space-y-3">
-                <div className="flex items-center gap-3">
-                  <GitBranch size={20} className="text-slate-900" />
-                  <h4 className="text-lg font-bold text-slate-900">DAG: The Velocity Engine</h4>
-                </div>
-                <p className="text-slate-500 text-sm leading-relaxed max-w-md">
-                  Shattering the linear bottleneck. Independent events execute concurrently, achieving a 100x increase in throughput while maintaining crystal-clear causal lineage.
-                </p>
-                <div className="flex gap-4 pt-2">
-                  <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded">100x TPS</span>
-                  <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded">Zero Packaging Delay</span>
-                </div>
-              </div>
-              <div className="group space-y-3">
-                <div className="flex items-center gap-3">
-                  <Box size={20} className="text-slate-900" />
-                  <h4 className="text-lg font-bold text-slate-900">Anchor: The Consensus Hub</h4>
-                </div>
-                <p className="text-slate-500 text-sm leading-relaxed max-w-md">
-                  Solidifying the asynchronous stream. Anchors provide immutable finality and rapid synchronization, allowing new nodes to sync the chain without replaying full history.
-                </p>
-                <div className="flex gap-4 pt-2">
-                  <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded">Merkle Integrity</span>
-                  <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded">Instant Finality</span>
-                </div>
-              </div>
-            </div>
+      <section className="bg-black/80 backdrop-blur-sm py-32 border-b border-white/20 font-mono relative z-10">
+        <div className="max-w-[1440px] mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-16">
+          <div className="lg:col-span-4 space-y-6">
+            <h2 className="text-sm font-semibold text-indigo-500 uppercase tracking-widest">Engine Core</h2>
+            <p className="text-2xl text-white tracking-widest leading-tight">
+              De-Sequentialized <br />
+              Infrastructure for <br />
+              Autonomous Agents.
+            </p>
+            <div className="h-32 w-px bg-white/20 mt-12 hidden lg:block"></div>
           </div>
-          <div className="relative flex items-center justify-center">
-            <div className="w-full aspect-square max-w-md border border-slate-100 rounded-full flex items-center justify-center relative">
-              <div className="absolute inset-0 border border-indigo-100 rounded-full scale-75 animate-pulse"></div>
-              <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-              <div className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent"></div>
-              <div className="z-10 bg-white p-6 border border-slate-200 rounded-2xl shadow-xl flex flex-col items-center gap-2">
-                <Zap size={24} className="text-indigo-600" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Setu Core</span>
-              </div>
-              <div className="absolute top-10 left-10 p-3 bg-white border border-slate-100 rounded-xl shadow-sm italic text-[10px] text-slate-500">Causal_Lineage</div>
-              <div className="absolute bottom-10 right-10 p-3 bg-white border border-slate-100 rounded-xl shadow-sm italic text-[10px] text-slate-500">Anchor_Finality</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-32 border-b border-slate-100">
-        <div className="max-w-[1440px] mx-auto px-8 space-y-20">
-          <div className="text-center space-y-4">
-            <h2 className="text-sm font-mono font-bold text-indigo-600 uppercase tracking-[0.4em]">Vector Logical Clocks</h2>
-            <h3 className="text-4xl font-bold text-slate-900 tracking-tight italic">The Pulse of Digital Causality.</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {vlcFeatures.map((feature, i) => (
-              <div key={i} className="bg-white p-8 border border-slate-200 rounded-2xl space-y-4 hover:border-indigo-400 transition-all">
-                <div className="text-indigo-600"><feature.icon size={20} /></div>
-                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-widest">{feature.title}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed font-medium">{feature.desc}</p>
-              </div>
+          <div className="lg:col-span-8">
+            {[
+              { number: '01', tag: 'DAG Fabric', title: 'Asynchronous Causality', desc: 'Shattering sequential bottlenecks. Each event transition centers on parent-child lineage, enabling massive parallel state processing without central locks.' },
+              { number: '02', tag: 'VLC Sync', title: 'Vector Logical Clocks', desc: 'Deterministic ordering in an asynchronous world. VLC provides precise partial ordering for cross-subnet events with sub-millisecond overhead.' },
+              { number: '03', tag: 'TEE Compute', title: 'Silicon-Level Integrity', desc: 'Validator nodes operate within Trusted Execution Environments, ensuring hardware-verified execution for complex causal flows.' },
+              { number: '04', tag: 'Global Anchor', title: 'Deterministic Finality', desc: 'Periodic anchors solidify the state, condensing the DAG into immutable truth points for optimized history synchronization.' },
+            ].map((spec) => (
+              <TechnicalSpec key={spec.number} number={spec.number} tag={spec.tag} title={spec.title} desc={spec.desc} />
             ))}
           </div>
         </div>
       </section>
 
-      <section className="max-w-[1440px] mx-auto px-8 py-40">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
-          <div className="lg:col-span-12 text-center space-y-6 mb-12">
-            <h2 className="text-sm font-mono font-bold text-indigo-600 uppercase tracking-[0.4em]">Infrastructure Design</h2>
-            <h3 className="text-5xl font-bold text-slate-900 tracking-tighter">Decoupled Consensus & Execution.</h3>
-          </div>
-          <div className="lg:col-span-4 p-10 bg-white border border-slate-100 rounded-3xl space-y-6 hover:shadow-2xl hover:shadow-slate-100 transition-all">
-            <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg"><User size={24} /></div>
-            <h4 className="text-xl font-bold text-slate-900">Client Layer</h4>
-            <p className="text-sm text-slate-500 leading-relaxed font-medium">
-              Entry point for autonomous agents. Triggers business logic and submits atomic event sequences to the DAG engine for asynchronous processing.
-            </p>
-          </div>
-          <div className="lg:col-span-4 p-10 bg-indigo-600 text-white rounded-3xl space-y-6 shadow-2xl shadow-indigo-200 transform lg:scale-110 relative z-10">
-            <div className="w-12 h-12 bg-white text-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><Cpu size={24} /></div>
-            <h4 className="text-xl font-bold">TEE Solver Layer</h4>
-            <p className="text-indigo-100 text-sm leading-relaxed font-medium">
-              Massive parallel execution. Dedicated Solver clusters perform TEE-verified computation independently of consensus, scaling linearly based on network pressure.
-            </p>
-          </div>
-          <div className="lg:col-span-4 p-10 bg-white border border-slate-100 rounded-3xl space-y-6 hover:shadow-2xl hover:shadow-slate-100 transition-all">
-            <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg"><ShieldCheck size={24} /></div>
-            <h4 className="text-xl font-bold text-slate-900">Validator Layer</h4>
-            <p className="text-sm text-slate-500 leading-relaxed font-medium">
-              Pure-consensus focus. Multiple Validators solidify Anchor packaging and verify VLC state proofs, maintaining global causal integrity without execution overhead.
-            </p>
+      <section className="bg-black/90 py-32 border-b border-white/20 font-mono relative z-10">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <div className="space-y-16">
+              <div className="space-y-6">
+                <h2 className="text-sm font-semibold text-indigo-400 uppercase tracking-widest">Hybrid Architecture</h2>
+                <h3 className="text-4xl text-white tracking-widest leading-tight">
+                  Merging Parallel Flow <br />
+                  with Deterministic Finality.
+                </h3>
+              </div>
+              <div className="space-y-12">
+                <div className="group space-y-4 border-l border-white/10 pl-6 hover:border-indigo-500 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <span className="text-indigo-400"><GitBranch size={20} /></span>
+                    <h4 className="text-base font-semibold text-white tracking-wide">DAG / The Velocity Engine</h4>
+                  </div>
+                  <p className="text-white/50 text-xs leading-relaxed max-w-md tracking-wide">
+                    Shattering the linear bottleneck. Independent events execute concurrently, achieving a massive increase in throughput while maintaining crystal-clear causal lineage.
+                  </p>
+                  <div className="flex gap-3 pt-2">
+                    <span className="text-[10px] bg-white/5 rounded-full px-3 py-1 uppercase text-white/50 tracking-wider">100x TPS</span>
+                    <span className="text-[10px] bg-white/5 rounded-full px-3 py-1 uppercase text-white/50 tracking-wider">Zero Delay</span>
+                  </div>
+                </div>
+
+                <div className="group space-y-4 border-l border-white/10 pl-6 hover:border-indigo-500 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <span className="text-white"><Box size={20} /></span>
+                    <h4 className="text-base font-semibold text-white tracking-wide">Anchor / The Consensus Hub</h4>
+                  </div>
+                  <p className="text-white/50 text-xs leading-relaxed max-w-md tracking-wide">
+                    Solidifying the asynchronous stream. Anchors provide immutable finality and rapid synchronization, allowing new nodes to sync the chain without replaying full history.
+                  </p>
+                  <div className="flex gap-3 pt-2">
+                    <span className="text-[10px] bg-white/5 rounded-full px-3 py-1 uppercase text-white/50 tracking-wider">Merkle Integrity</span>
+                    <span className="text-[10px] bg-white/5 rounded-full px-3 py-1 uppercase text-white/50 tracking-wider">Fast Finality</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative flex items-center justify-center p-8 lg:p-12">
+              <div className="w-full aspect-square max-w-[420px] relative flex items-center justify-center">
+                {/* Glowing Orbs */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-500/10 rounded-full blur-[60px] pointer-events-none" />
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-48 h-48 bg-white/5 rounded-full blur-[60px] pointer-events-none" />
+
+                {/* Animated Rings */}
+                <div className="absolute inset-0 border border-white/5 rounded-full"></div>
+                <div className="absolute inset-8 border border-white/10 border-dashed rounded-full animate-[spin_60s_linear_infinite_reverse]"></div>
+                <div className="absolute inset-16 border border-white/5 rounded-full animate-[spin_40s_linear_infinite]">
+                  <div className="absolute top-0 left-1/2 w-2 h-2 bg-indigo-400 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.8)] -translate-x-1/2 -translate-y-1/2" />
+                  <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] -translate-x-1/2 translate-y-1/2" />
+                </div>
+
+                {/* Connecting horizontal line */}
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-y-1/2" />
+
+                {/* Central Core Element */}
+                <div className="relative z-10 bg-black/80 backdrop-blur-xl w-36 h-36 rounded-full border border-indigo-500/30 flex flex-col items-center justify-center gap-3 shadow-[0_0_50px_rgba(99,102,241,0.15)] group hover:scale-110 hover:border-indigo-400/50 hover:shadow-[0_0_80px_rgba(99,102,241,0.3)] transition-all duration-500 cursor-default">
+                  <div className="absolute inset-0 rounded-full border border-white/10 scale-[1.15] opacity-0 group-hover:opacity-100 group-hover:scale-[1.2] group-hover:rotate-45 transition-all duration-700 border-dashed" />
+                  <Zap size={32} className="text-indigo-400 group-hover:animate-pulse" />
+                  <span className="text-xs font-bold tracking-widest text-white uppercase">Setu Core</span>
+                </div>
+
+                {/* Floating Labels */}
+                <div className="absolute top-[20%] right-[-5%] lg:right-[-15%] flex flex-col items-start gap-2 bg-black/60 backdrop-blur-md px-4 py-2 border border-white/10 rounded-xl">
+                  <span className="text-[10px] font-mono text-white/50 tracking-widest uppercase flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white/20 animate-pulse" /> Immutable
+                  </span>
+                </div>
+                <div className="absolute bottom-[20%] left-[-5%] lg:left-[-15%] flex flex-col items-end gap-2 bg-black/60 backdrop-blur-md px-4 py-2 border border-indigo-500/20 rounded-xl">
+                  <span className="text-[10px] font-mono text-indigo-400/80 tracking-widest uppercase flex items-center gap-2">
+                    Concurrent <span className="w-2 h-2 rounded-full bg-indigo-500/50 animate-pulse" />
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-    </div>
+
+      <section className="bg-black py-32 border-b border-white/20 font-mono relative z-10 opacity-95">
+        <div className="max-w-[1440px] mx-auto px-8 space-y-20">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }} className="text-center space-y-6 flex flex-col items-center">
+            <h2 className="text-sm font-semibold text-indigo-500 uppercase tracking-widest px-4 py-1">Vector Logical Clocks</h2>
+            <h3 className="text-3xl lg:text-4xl text-white tracking-widest">The Pulse of Digital Causality</h3>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {vlcFeatures.map((feature, i) => (
+              <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.6, delay: i * 0.1 }} key={i} className="bg-black p-8 border border-white/10 space-y-6 hover:border-indigo-500 transition-all group rounded-xl">
+                <div className="text-white/40 group-hover:text-indigo-400 transition-colors"><feature.icon size={24} /></div>
+                <h4 className="text-base font-semibold text-white tracking-wide">{feature.title}</h4>
+                <p className="text-sm text-white/50 leading-relaxed font-medium">{feature.desc}</p>
+                <div className="pt-4 border-t border-white/10 w-8 group-hover:w-full group-hover:border-indigo-500 transition-all" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-black py-40 font-mono relative overflow-hidden z-20">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
+        <div className="max-w-[1440px] mx-auto px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }} className="lg:col-span-12 text-center space-y-6 mb-16">
+              <h2 className="text-sm font-semibold text-indigo-500 uppercase tracking-widest">Infrastructure Design</h2>
+              <h3 className="text-4xl text-white tracking-widest">Decoupled Consensus & Execution</h3>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.7, delay: 0.1 }} className="lg:col-span-4 p-8 bg-black border border-white/10 rounded-2xl space-y-8 hover:border-indigo-500 transition-colors relative group">
+              <div className="w-14 h-14 bg-white/5 rounded-xl text-white flex items-center justify-center group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-colors"><User size={24} /></div>
+              <h4 className="text-lg font-bold text-white tracking-wide">Client Layer</h4>
+              <p className="text-sm text-white/50 leading-relaxed font-medium">
+                Entry point for autonomous agents. Triggers business logic and submits atomic event sequences to the DAG engine for asynchronous processing.
+              </p>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.7, delay: 0.3 }} className="lg:col-span-4 p-8 bg-indigo-500/5 border border-indigo-500/50 rounded-2xl space-y-8 relative transform lg:-translate-y-4 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+              <div className="w-14 h-14 bg-indigo-600 rounded-xl text-white flex items-center justify-center"><Cpu size={24} /></div>
+              <h4 className="text-lg font-bold text-white tracking-wide">TEE Solver Layer</h4>
+              <p className="text-sm text-indigo-200/80 leading-relaxed font-medium">
+                Massive parallel execution. Dedicated Solver clusters perform TEE-verified computation independently of consensus, scaling linearly based on network pressure.
+              </p>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.7, delay: 0.5 }} className="lg:col-span-4 p-8 bg-black border border-white/10 rounded-2xl space-y-8 hover:border-indigo-500 transition-colors relative group">
+              <div className="w-14 h-14 bg-white/5 rounded-xl text-white flex items-center justify-center group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-colors"><ShieldCheck size={24} /></div>
+              <h4 className="text-lg font-bold text-white tracking-wide">Validator Layer</h4>
+              <p className="text-sm text-white/50 leading-relaxed font-medium">
+                Pure-consensus focus. Multiple Validators solidify Anchor packaging and verify VLC state proofs, maintaining global causal integrity without execution overhead.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+    </div >
   );
 };

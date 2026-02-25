@@ -69,7 +69,7 @@ function layoutNodes(apiNodes: DagNode[]): NodeData[] {
       seedZ: Math.random() * 100,
       type: n.type,
       label: n.label || n.id,
-      color: n.color || '#3b82f6',
+      color: n.color || '#818cf8',
     };
   });
 }
@@ -90,7 +90,7 @@ function generateMockNodes(count: number): NodeData[] {
     seedZ: Math.random() * 100,
     type: types[Math.floor(Math.random() * 3)],
     label: `ev_${i}`,
-    color: '#3b82f6',
+    color: '#6366f1',
   }));
 }
 
@@ -124,23 +124,45 @@ const FloatingNode: React.FC<FloatingNodeProps> = ({ node, isSelected, isRelated
     <group ref={groupRef}>
       <mesh onClick={onClick} onPointerOver={() => setHover(true)} onPointerOut={() => setHover(false)}>
         <sphereGeometry args={[node.size, 16, 16]} />
-        <meshBasicMaterial
-          color={isSelected ? "#60a5fa" : node.color}
+        <meshStandardMaterial
+          color={isSelected ? "#22d3ee" : "#818cf8"}
+          emissive={isSelected ? "#22d3ee" : "#6366f1"}
+          emissiveIntensity={isSelected ? 3 : 1.5}
           transparent
-          opacity={isDimmed ? 0.2 : 0.9}
+          opacity={isDimmed ? 0.3 : 1}
         />
+        {/* Core highlight core for more punch */}
+        <mesh>
+          <sphereGeometry args={[node.size * 0.7, 16, 16]} />
+          <meshBasicMaterial
+            color="#ffffff"
+            transparent
+            opacity={isDimmed ? 0.1 : 0.8}
+            depthWrite={false}
+          />
+        </mesh>
+        {/* Adds a soft glowing halo around nodes */}
+        <mesh>
+          <sphereGeometry args={[node.size * 1.8, 16, 16]} />
+          <meshBasicMaterial
+            color={isSelected ? "#22d3ee" : "#818cf8"}
+            transparent
+            opacity={isDimmed ? 0.05 : 0.3}
+            depthWrite={false}
+          />
+        </mesh>
         <Billboard>
           <Html distanceFactor={10}>
             <div className={`transition-all duration-500 flex flex-col items-center pointer-events-none ${isDimmed ? 'opacity-0' : 'opacity-100'}`}>
               {(hovered || isRelated) && (
-                <div className="mt-8 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+                <div className="mt-10 flex flex-col items-center animate-in fade-in zoom-in duration-300">
                   <span
-                    className={`text-[9px] font-black text-white px-2.5 py-1 rounded shadow-lg cursor-pointer pointer-events-auto transition-colors ${isSelected ? 'bg-cyan-500 shadow-cyan-200' : 'bg-blue-600 shadow-blue-100'}`}
+                    className={`text-[9px] font-black text-white px-3 py-1.5 rounded-md cursor-pointer pointer-events-auto transition-all ${isSelected ? 'bg-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.6)]' : 'bg-black/80 border border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.2)] backdrop-blur-md'}`}
                     onClick={(e) => { e.stopPropagation(); onNavigate('event_detail', node.eventId); }}
                   >
                     {node.label}
                   </span>
-                  <span className="text-[7px] text-slate-500 font-bold uppercase mt-1 tracking-widest">{node.type}</span>
+                  <span className="text-[7px] text-indigo-300 font-black uppercase mt-1 tracking-[0.3em] bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm shadow-[0_0_10px_rgba(0,0,0,0.5)]">{node.type}</span>
                 </div>
               )}
             </div>
@@ -174,7 +196,7 @@ const DistantNodes = () => {
 
   return (
     <Points ref={ref} positions={points} stride={3}>
-      <PointMaterial transparent color="#3b82f6" size={0.06} sizeAttenuation={true} depthWrite={false} opacity={0.25} />
+      <PointMaterial transparent color="#a5b4fc" size={0.08} sizeAttenuation={true} depthWrite={false} opacity={0.6} blending={THREE.AdditiveBlending} />
     </Points>
   );
 };
@@ -234,10 +256,11 @@ const DagConnections = ({ nodes, edges, selectedId }: { nodes: NodeData[]; edges
           <Line
             key={i}
             points={[conn.p1, conn.p2]}
-            color={conn.isHighlighted ? "#3b82f6" : "#cbd5e1"}
-            lineWidth={conn.isHighlighted ? 1.5 : 0.5}
+            color={conn.isHighlighted ? "#22d3ee" : "#818cf8"}
+            lineWidth={conn.isHighlighted ? 3 : 1}
             transparent
-            opacity={conn.isHighlighted ? 0.8 : 0.15}
+            opacity={conn.isHighlighted ? 0.9 : 0.15}
+            blending={THREE.AdditiveBlending}
           />
         );
       })}
@@ -308,14 +331,21 @@ export const CausalGraph = ({ onNavigate }: CausalGraphProps) => {
   }, [selectedId, nodes, edges]);
 
   return (
-    <section className="bg-gradient-to-br from-slate-100 via-white to-blue-50/30 rounded-2xl border border-slate-300/50 shadow-xl overflow-hidden p-0 relative h-[600px] flex flex-col">
+    <section className="bg-black/70 backdrop-blur-md rounded-[20px] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden relative h-[600px] flex flex-col group">
+      {/* Sci-fi Central Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen opacity-70 group-hover:opacity-100 transition-opacity duration-1000" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[80px] pointer-events-none mix-blend-screen opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" />
+
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDBINDBWMHoiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTAgMEg0MFY0MEgweiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz4KPC9zdmc+')] pointer-events-none opacity-50 mix-blend-screen" />
+
       <div className="absolute top-8 left-8 z-10 pointer-events-none">
-        <h3 className="font-bold text-slate-800 flex items-center gap-2 text-sm tracking-widest uppercase">
-          <GitBranch size={16} className="text-blue-600" />
-          Live causal graph
+        <h3 className="font-black text-white flex items-center gap-2 text-xs tracking-[0.2em] uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+          <GitBranch size={16} className="text-cyan-400" strokeWidth={2.5} />
+          Live Causal Graph
         </h3>
-        <p className="text-slate-500 text-[10px] font-bold mt-1">
-          {selectedId ? `Inspecting sequence path for ${selectedId}` : "Real-time 3D deterministic event propagation"}
+        <p className="text-indigo-300 text-[10px] font-bold mt-1.5 uppercase tracking-widest drop-shadow-sm">
+          {selectedId ? `Inspecting path: ${selectedId}` : "Sequence Map & Propagation"}
         </p>
       </div>
 
@@ -323,27 +353,30 @@ export const CausalGraph = ({ onNavigate }: CausalGraphProps) => {
         {selectedId && (
           <button
             onClick={() => setSelectedId(null)}
-            className="px-4 py-1.5 bg-white/80 backdrop-blur-md text-slate-900 rounded-lg text-[10px] font-black uppercase hover:bg-white transition-all border border-slate-200 shadow-sm pointer-events-auto"
+            className="px-4 py-1.5 bg-black/60 backdrop-blur-md text-cyan-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500/20 hover:text-cyan-300 transition-all border border-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.1)] pointer-events-auto"
           >
-            Clear selection
+            Clear Target
           </button>
         )}
-        <div className={`backdrop-blur-sm px-3 py-1.5 rounded-lg border flex items-center gap-2 ${isLive ? 'bg-green-50/80 border-green-100' : 'bg-blue-50/80 border-blue-100'}`}>
-          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLive ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-          <span className={`text-[9px] font-black uppercase tracking-widest italic ${isLive ? 'text-green-600' : 'text-blue-600'}`}>
-            {isLive ? 'Live data' : 'Demo mode'}
+        <div className={`backdrop-blur-md px-3 py-1.5 rounded-lg border flex items-center gap-2 ${isLive ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-indigo-500/10 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]'}`}>
+          <div className={`w-1.5 h-1.5 rounded-full animate-pulse shadow-lg ${isLive ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,1)]' : 'bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,1)]'}`}></div>
+          <span className={`text-[9px] font-black uppercase tracking-widest italic ${isLive ? 'text-emerald-400' : 'text-indigo-300'}`}>
+            {isLive ? 'Live Sync' : 'Demo'}
           </span>
         </div>
       </div>
 
-      <div className="w-full h-full cursor-grab active:cursor-grabbing">
+      <div className="w-full h-full cursor-grab active:cursor-grabbing relative z-0">
         <Suspense fallback={null}>
           <Canvas
             camera={{ position: [0, 0, 10], fov: 40 }}
             onPointerMissed={() => setSelectedId(null)}
+            gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
           >
-            <ambientLight intensity={1.5} />
-            <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
+            <ambientLight intensity={0.8} />
+            <pointLight position={[10, 10, 10]} intensity={2.5} color="#22d3ee" />
+            <pointLight position={[-10, -10, -10]} intensity={1.5} color="#818cf8" />
+            <directionalLight position={[0, 5, 5]} intensity={0.5} color="#ffffff" />
 
             <group>
               <DagConnections nodes={nodes} edges={edges} selectedId={selectedId} />
@@ -361,7 +394,7 @@ export const CausalGraph = ({ onNavigate }: CausalGraphProps) => {
               ))}
             </group>
 
-            <OrbitControls enableZoom={false} enablePan={false} autoRotate={!selectedId} autoRotateSpeed={0.5} />
+            <OrbitControls enableZoom={false} enablePan={false} autoRotate={!selectedId} autoRotateSpeed={1} />
           </Canvas>
         </Suspense>
       </div>
