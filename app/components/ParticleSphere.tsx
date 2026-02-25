@@ -18,15 +18,27 @@ void main() {
     vec3 pos = position;
     float alive = 1.0 - uProgress;
 
-    // === 1. IDLE WAVE ===
-    float waveAmp = 0.05 + uMouseInfluence * 0.03 * alive;
-    float waveSpeed = 0.5 + uMouseInfluence * 0.12;
-    pos.x += sin(uTime * waveSpeed + pos.y * 2.0) * waveAmp;
-    pos.y += cos(uTime * (waveSpeed * 0.6) + pos.z * 2.0) * waveAmp;
-    pos.z += sin(uTime * (waveSpeed * 0.8) + pos.x * 2.0) * waveAmp * 0.5;
+    // === 1. IDLE BREATHING & WAVE ===
+    // Base breathing pulse (slow expansion/contraction)
+    float breathe = sin(uTime * 0.8) * 0.05 + sin(uTime * 0.3) * 0.03;
+    float radialInfluence = length(position);
+    pos += normalize(position) * breathe * alive;
+
+    // Organic fluctuation waves
+    float waveAmp = 0.08 + uMouseInfluence * 0.05 * alive;
+    float waveSpeed = 0.6 + uMouseInfluence * 0.2;
+    
+    // Layered noise-like displacement
+    pos.x += sin(uTime * waveSpeed + pos.y * 1.5 + pos.z * 0.5) * waveAmp * alive;
+    pos.y += cos(uTime * (waveSpeed * 0.7) + pos.z * 1.8 + pos.x * 0.3) * waveAmp * alive;
+    pos.z += sin(uTime * (waveSpeed * 0.9) + pos.x * 2.2 + pos.y * 0.4) * waveAmp * alive;
+    
+    // Subtle 'shimmer' ripple
+    float ripple = sin(radialInfluence * 4.0 - uTime * 2.5) * 0.02 * alive;
+    pos += normalize(position) * ripple;
 
     // === 2. GLOBAL DRAG ===
-    float dragStrength = uMouseInfluence * 0.10 * alive;
+    float dragStrength = uMouseInfluence * 0.12 * alive;
     pos.x += uSmoothMouse.x * dragStrength;
     pos.y += uSmoothMouse.y * dragStrength;
 
@@ -38,23 +50,23 @@ void main() {
     // === 4. LOCAL GLOW ===
     vec2 particleNDC = clipPos.xy / clipPos.w;
     float screenDist = distance(particleNDC, uMouseNDC);
-    float localProx = smoothstep(0.4, 0.0, screenDist) * alive;
+    float localProx = smoothstep(0.35, 0.0, screenDist) * alive;
 
-    float j = localProx * 0.03;
-    finalPos.x += sin(uTime * 12.0 + position.y * 30.0) * j;
-    finalPos.y += cos(uTime * 15.6 + position.z * 30.0) * j;
+    float j = localProx * 0.04;
+    finalPos.x += sin(uTime * 15.0 + position.y * 20.0) * j;
+    finalPos.y += cos(uTime * 18.6 + position.z * 25.0) * j;
 
     mvPos = modelViewMatrix * vec4(finalPos, 1.0);
     gl_Position = projectionMatrix * mvPos;
 
     // === 5. COLOR ===
-    float globalBright = uMouseInfluence * 0.12 * alive;
-    float localBright = localProx * 0.6;
+    float globalBright = uMouseInfluence * 0.15 * alive;
+    float localBright = localProx * 0.8;
     vColor = mix(aColor, vec3(1.0), globalBright + localBright);
 
     // === 6. SIZE ===
-    float boost = 1.0 + localProx * 1.0 + uMouseInfluence * 0.15 * alive;
-    gl_PointSize = aSize * (15.0 / -mvPos.z) * mix(1.0, 1.5, uProgress) * boost;
+    float boost = 1.0 + localProx * 1.5 + uMouseInfluence * 0.2 * alive;
+    gl_PointSize = aSize * (16.0 / -mvPos.z) * mix(1.0, 1.3, uProgress) * boost;
 }
 `;
 
