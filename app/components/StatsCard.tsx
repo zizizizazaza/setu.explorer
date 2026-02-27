@@ -4,7 +4,7 @@ import { RollingNumber } from './RollingNumber';
 interface StatsCardProps {
   title: string;
   value: string | number;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
   subValue?: string;
   /** Optional suffix for numeric value (e.g. "s" for seconds). When set, value is rendered with RollingNumber. */
   suffix?: string;

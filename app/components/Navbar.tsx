@@ -131,7 +131,7 @@ export const Navbar = ({ onNavigate, currentPath }: NavbarProps) => {
   }, []);
 
 
-  const iconMap: Record<string, React.ElementType> = {
+  const iconMap: Record<string, any> = {
     anchor: Box,
     event: Activity,
     account: User,
